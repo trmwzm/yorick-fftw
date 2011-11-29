@@ -3,13 +3,9 @@ plug_dir, ["."];
 require, "yfftw.i";
 require, "offt.i";
 
-func cplxgr(d){return random_n(d)+1i*random_n(d);}
-//func cplx2f(c){d=dimsof(c);x=c;reshape,x,double,_(d(1)+1,2,d(2:));return float(x);}
-func cplx2f(c){d=dimsof(c);x=array(float,_(d(1)+1,2,d(2:,..)));x(1,..)=c.re;x(2,..)=c.im;return float(x);}
-
 func _fftw_check (void)
 {
-  if(is_void(n))n= 1024;
+  if (is_void(n)) n= 1024;
   
   write,""
   write,"Exec. this twice to see the effect of cached wisdom";
@@ -46,17 +42,17 @@ func _fftw_check (void)
   //float /*---------------------------------------*/
   c= cplx2f(c);
   //out-of-place
-  fw= fftw(c, ld);            /* plan and exec */
-  plan= fftw(dimsof(c), ld);          /* plan */
-  fw= fftw(c, ld, [], plan);  /* exec */
-  fftw_clean, plan;
+  fw= fftw(c, ld, fcplx=1);            /* plan and exec */
+  plan= fftw(dimsof(c), ld, fcplx=1);          /* plan */
+  fw= fftw(c, ld, [], plan, fcplx=1);  /* exec */
+  fftw_clean, plan, fcplx=1;
   //in-place
   fw= c;
-  fftw, fw, ld;               /* plan and exec */
-  fftw, dimsof(c), ld, [], plan;      /* plan */
+  fftw, fw, ld, fcplx=1;               /* plan and exec */
+  fftw, dimsof(c), ld, [], plan, fcplx=1;      /* plan */
   fw= c;
-  fftw, fw, ld, [], plan;      /* exec */
-  fftw_clean, plan;
+  fftw, fw, ld, [], plan, fcplx=1;      /* exec */
+  fftw_clean, plan, fcplx=1;
   write,"Done float use cases";
 
   timer, elapsed, split2;
@@ -74,7 +70,7 @@ func _fftw_check (void)
 
   //fftw
   plan= fftw(d, ld);          /* plan */
-  for (i=0 ; i<32 ; i++) fw= fftw(c, ld, [], plan);  /* exec */
+  for (i=0 ; i<32 ; i++) fw= fftw(c, ld, [], plan, keep=1);  /* exec */
   fftw_clean, plan;
   timer, elapsed, split3;
   write,"Fftw done:";
@@ -122,7 +118,7 @@ func ck1(d,ld)
      format=" PTP-Diffs {Double_Swarztrauber - Double_fftw} [Re, IM]: %15.8lg %15.8lg \n";
 
   fc= cplx2f(c);
-  fw= fftw(fc, ld);
+  fw= fftw(fc, ld, fcplx=1);
   fw= fw(1,..)+1i*fw(2,..);
   write,(fs.re-fw.re)(*)(ptp),(fs.im-fw.im)(*)(ptp),\
      format=" PTP-Diffs {Double_Swarztrauber - Float_fftw}  [Re, IM]: %15.8lg %15.8lg \n";
@@ -146,12 +142,12 @@ func fftw_test(n, nosave=)
   fz(1,..)= z;
   //
   zf= fftw(z, 1,nosave=nosave);
-  fzf= fftw(fz, 1,nosave=nosave);
+  fzf= fftw(fz, 1,nosave=nosave,fcplx=1);
   z3= z2= array(0i, n);
   z3(4)= -0.5i*n;
   z3(-2)= 0.5i*n;
   zb= fftw(z, -1,nosave=nosave);
-  fzb= fftw(fz, -1,nosave=nosave);
+  fzb= fftw(fz, -1,nosave=nosave,fcplx=1);
   if (max(abs(zf-z3))>1.e-12*n || max(abs(zb-conj(z3)))>1.e-12*n)
     write, "***WARNING*** failed double 1D fftw test";
   if (max(fcabs(fzf-cplx2f(z3)))>1.e-6*n || max(fcabs(fzb-cplx2f(conj(z3))))>1.e-6*n)
@@ -160,10 +156,10 @@ func fftw_test(n, nosave=)
     z*= cos(index*2)(-,);
     fz*= float(cos(index*2))(-,-,);
     zf= fftw(z, [0, 1],nosave=nosave);
-    fzf= fftw(fz, [0, 1],nosave=nosave);
+    fzf= fftw(fz, [0, 1],nosave=nosave,fcplx=1);
     z2(3)= z2(-1)= 0.5*n;
     zb= fftw(z, [], [-1, 0],nosave=nosave);
-    fzb= fftw(fz, [], [-1, 0],nosave=nosave);
+    fzb= fftw(fz, [], [-1, 0],nosave=nosave,fcplx=1);
     if (max(abs(zf-sin(index*3)*z2(-,)))>1.e-12*n ||
         max(abs(zb-conj(z3)*cos(index*2)(-,)))>1.e-12*n)
       error, "***WARNING*** failed first double 2D fftw test";
@@ -172,8 +168,8 @@ func fftw_test(n, nosave=)
       error, "***WARNING*** failed first float 2D fftw test";
     zf= fftw(z, 1,nosave=nosave);
     zb= fftw(z, -1,nosave=nosave);
-    fzf= fftw(fz, 1,nosave=nosave);
-    fzb= fftw(fz, -1,nosave=nosave);
+    fzf= fftw(fz, 1,nosave=nosave,fcplx=1);
+    fzb= fftw(fz, -1,nosave=nosave,fcplx=1);
     if (max(abs(zf-z3*z2(-,)))>1.e-12*n ||
         max(abs(zb-conj(z3)*z2(-,)))>1.e-12*n)
       error, "***WARNING*** failed second double 2D fftw test";
@@ -194,50 +190,56 @@ func cplx2f (z) {
   return f;
 }
 
-func offtcheck (d,usefftw=)
+func _offt_check (d,usefftw=)
 {
   if (is_void(d)) d= [2,128,256];
   for (n=1,i=1;i<=d(1);i++)
     n*= d(i+1);
 
-  oo= offt(dims=d,ljdir=1,usefftw=usefftw); 
-  ooi= offt(dims=d,ljdir=-1,usefftw=usefftw); 
+  oo= offt(usefftw=usefftw);   
+  ooi= offt(usefftw=usefftw); 
   
   c= cplxgr(d); 
   cf= oo(c,1);
   cf= ooi(cf,-1)/n;
+  oo, reset=1;
+  ooi, reset=1;
+ 
+  sf= (usefftw==1?" FFTW":string(0));
 
-  write,"\n double out-of-place";
+  write,"\n double out-of-place"+sf;
   write,"fft  Mean, STD: ",(dd=abs(c-cf)(*))(avg),dd(rms);
 
-  oo= offt(dims=d,ljdir=1,inplace=1,usefftw=usefftw);
-  ooi= offt(dims=d,ljdir=-1,inplace=1,usefftw=usefftw);
+  oo= offt(usefftw=usefftw);
+  ooi= offt(usefftw=usefftw);
 
   c= cplxgr(d); 
   cf= c;
   oo, cf, 1;
   ooi, cf, -1;
   cf*= 1.0/n;
+  oo, reset=1;
+  ooi, reset=1;
 
-  write,"\n double in-place";
+  write,"\n double in-place"+sf;
   write,"fft  Mean, STD: ",(dd=abs(c-cf)(*))(avg),dd(rms);
 
   if (usefftw==1) {
     d2= _(d(1)+1,2,d(2:));
 
-    oow= offt(dims=d2,ljdir=1,usefftw=1); 
-    ooiw= offt(dims=d2,ljdir=-1,usefftw=1);
+    oow= offt(usefftw=1); 
+    ooiw= offt(usefftw=1);
 
     c= cplx2f(cplxgr(d)); 
-    cfw= oow(c,1);
-    cfw= ooiw(cfw,-1)/n;
+    cfw= oow(c,1,fcplx=1);
+    cfw= ooiw(cfw,-1,fcplx=1)/n;
     oow, reset=1;
     ooiw, reset=1;
-    write,"\n float out-of-place";
+    write,"\n float out-of-place"+sf;
     write,"fftw Mean, STD: ",(dd=abs(c-cfw)(*))(avg),dd(rms);
 
-    oow= offt(dims=d2,ljdir=1,usefftw=1,inplace=1); 
-    ooiw= offt(dims=d2,ljdir=-1,usefftw=1,inplace=1);
+    oow= offt(usefftw=1,fcplx=1); 
+    ooiw= offt(usefftw=1,fcplx=1);
     c= cplx2f(cplxgr(d)); 
     cfw= c;
     oow, cfw, 1;
@@ -245,14 +247,14 @@ func offtcheck (d,usefftw=)
     cfw*= 1.0/n;
     oow, reset=1;
     ooiw, reset=1;
-    write,"\n float in-place";
+    write,"\n float in-place"+sf;
     write,"fftw Mean, STD: ",(dd=abs(c-cfw)(*))(avg),dd(rms);
   }
 }
 
 if(batch()){
   _fftw_check;
-  offtcheck;
-  offtcheck,usefftw=1;
+  _offt_check;
+  _offt_check,usefftw=1;
 }
 

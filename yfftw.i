@@ -107,13 +107,12 @@ func fftwf_init_wisdom (nlimit)
   return _fftwfO(FFTWF_WISDOM_FNM);
 }
 
-func fftw (x, ljdir, rjdir, &plan, nosave=, keep=)
-/* DOCUMENT y= fftw(x, ljdir, rjdir, &plan, nosave=, keep=)
+func fftw (x, ljdir, rjdir, &plan, nosave=, fcplx=, keep=)
+/* DOCUMENT y= fftw(x, ljdir, rjdir, &plan, nosave=, fcplx=, keep=)
    main yorick_fftw(3) interface, much of it similar to fft.i.
    returns Y the complex Fastest Fourier Transform of array X.
-   Input arrays X==array(2,..) are implicitely treated as fcomplex
-   -- which is a bad idea which should be replaced by an fcplx=1 
-   option.
+   If FCPLX==1 input arrays X==array(float,2,..) are treated 
+   as float-complex.
    
    PLAN == array(long, 2) 
            where plan(1) is 0 if there is no dir=+1 transforms
@@ -194,9 +193,10 @@ func fftw (x, ljdir, rjdir, &plan, nosave=, keep=)
    the "forward" or "backward" transform four times in succession        
    yields N^2 times the original vector of length N.                 
 
-   Performing the transform requires PLANNING, which can be         
-   set up beforehand by calling fftw, if fftw is to be called        
-   more than once with arrays X of the same shape.           
+   Performing transforms requires PLANNING, which can be set up        
+   beforehand by calling fftw on a dimsof(X) array.  This allow fftw
+   to be called more than once with arrays X of the same shape with
+   KEEP==1.
 
    SEE ALSO:  fft, fft_inplace, fft_setup, fftw[f]_init_wisdom, fftw_wisdom,
              _fftwfI, _fftwfO, _fftwfP, _fftwfE, _fftwfD, _fftwfS, _fftwfC,
@@ -206,22 +206,24 @@ func fftw (x, ljdir, rjdir, &plan, nosave=, keep=)
   if (is_void(plan)) {
     plan= array(long,2);
     iplan= 1;
-  } else if (numberof(plan)==2&&allof(plan==[0,0])) {
+  } else if (numberof(plan)==2 && allof(plan==[0,0])) {
     iplan= 1;
   } else {
     iplan= 0;
   }
 
-  if (structof(x)==long) {    /* planning only feed dimsof(x) if d1==2 assume fftwf */
+  if (structof(x)==long) {  /* planning X dimsof(x) if d1==2 assume fftwf */
     iplan= 1;
     plan= array(long,2);
     planex= 0;
     if (x(1)==0) return;
     if (x(1)>7) error,"numberof dimensions > 7 ?";
     dims= x;
-    if (dims(2)!=2) {
+    if (fcplx!=1) {
       x= array(complex, dims);
     } else {
+      if (dims(2)!=2) 
+        error,"fcplx==1: float arrays leading dim==2, but dimsof(x)(2)="+pr1(dims(2));
       x= array(float, dims);
     }
   } else {
@@ -232,13 +234,17 @@ func fftw (x, ljdir, rjdir, &plan, nosave=, keep=)
      transform directions (dirs) */
   dims= dimsof(x);
   if (structof(x)==complex) {
-    xcplx= 1;
-  } else if (structof(x)==float&&dims(2)==2) {
-    xcplx= 0;
+    dcplx= 1;
+    if (fcplx==1)
+      error,"fcplx==1, but double-complex array to transform";
+  } else if (structof(x)==float) {
+    if (fcplx!=1)
+      error,"fcplx!=1, but float-complex array to transform, expecting fcplx==1";
+    dcplx= 0;
     dims= _(dims(1)-1,dims(3:));
   } else {
     x+= 0i;
-    xcplx= 1;
+    dcplx= 1;
   } 
 
   /* get dims & strides associated with each dimension & fft dimension mask */
@@ -252,10 +258,10 @@ func fftw (x, ljdir, rjdir, &plan, nosave=, keep=)
 
   if (am_subroutine()) {  /*inplace in==x out=xx */
     inplace= 1;
-    if (planex) {
+    if (planex==1) {
       eq_nocopy, xx, x;
     }
-    if (iplan) {
+    if (iplan==1) {
       if (!planex) {
         eq_nocopy, xop, x;      
       } else {
@@ -265,10 +271,10 @@ func fftw (x, ljdir, rjdir, &plan, nosave=, keep=)
     }
   } else {
     inplace= 0;
-    if (planex) {
+    if (planex==1) {
       xx= array(structof(x), dimsof(x));
     }
-    if (iplan) {
+    if (iplan==1) {
       if (!planex) {
         eq_nocopy, xop, x; 
         xip = array(structof(x), dimsof(x));
@@ -283,7 +289,7 @@ func fftw (x, ljdir, rjdir, &plan, nosave=, keep=)
     ip= 1+(idir<0);
     mksdir= dirs==idir;
     if (anyof(mksdir)) {
-      if (iplan) {
+      if (iplan==1) {
         list= where(mksdir);    /* list of dimensions to be transformed */
         n= numberof(list);
         nlist= where(!mksdir);  /* list of dimensions to be looped over */
@@ -291,44 +297,45 @@ func fftw (x, ljdir, rjdir, &plan, nosave=, keep=)
         stdlp= stds(nlist);
         if (is_void(dimlp)) dimlp= [0];
         if (is_void(stdlp)) stdlp= [0];
-        if (xcplx) {
+        if (dcplx==1) {
           plan(ip)= _fftwP(xip,xop,n,dims(list),stds(list),ndims-n,dimlp,stdlp,idir);
-          if (!nosave) _fftwO,FFTW_WISDOM_FNM; 
+          if (nosave != 1) _fftwO,FFTW_WISDOM_FNM; 
         } else {
           plan(ip)= _fftwfP(xip,xop,n,dims(list),stds(list),ndims-n,dimlp,stdlp,idir);
-          if (!nosave) _fftwfO,FFTWF_WISDOM_FNM;
+          if (nosave != 1) _fftwfO,FFTWF_WISDOM_FNM;
         }
       }
-      if (planex) {
-        if (xcplx) {
+      if (planex==1) {
+        if (dcplx==1) {
           _fftwE, plan(ip), x, xx;
-          if (iplan&&!keep) _fftwD, plan(ip);
+          if (iplan==1 && keep!=1) {_fftwD, plan(ip);plan(ip)= 0;};
         } else {
           _fftwfE, plan(ip), x, xx;
-          if (iplan&&!keep) _fftwfD, plan(ip);
+          if (iplan==1 && keep!=1) {_fftwfD, plan(ip);plan(ip)= 0;}
         }
         if (idir==1) x= xx;
       } 
     }
   }
-  if (planex==0) {
-    return plan;
-  } else {
-    return xx;
+  if (inplace!=1) {
+    if (planex==0) {
+      return plan;
+    } else {
+      return xx;
+    }
   }
 }
 
-func fftw_clean (p)
+func fftw_clean (&p, fcplx=)
 {
-  for (i=1;i<=numberof(p);i++) 
-    if(p(i))_fftwD, p(i);
+  if (fcplx!=1) 
+    for (i=1;i<=numberof(p);i++) 
+      if (p(i)) {_fftwD, p(i);p(i)= 0;}
+  else
+    for (i=1;i<=numberof(p);i++) 
+      if (p(i)) {_fftwfD, p(i);p(i)= 0;}
 }
 
-func fftwf_clean (p)
-{
-  for (i=1;i<=numberof(p);i++) 
-    if(p(i))_fftwfD, p(i);
-}
 /////////////////////////////////////////////////////////////////////////
 
 extern  _fftwT

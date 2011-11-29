@@ -6,7 +6,7 @@ require, "yfftw.i";
 scratch= save(scratch, tmp);
 tmp= save(_eval);
 
-func offt (base, ljdir=, rjdir=, dims=, usefftw=, inplace=)
+func offt (base, void, ljdir=, rjdir=, dims=, usefftw=, inplace=, fcplx=)
 /* DOCUMENT obj= offt(ljdir=,rjdir=,dims=,usefftw=,inplace=)
  *
  *   Return a new FFT operator object and initialize workspace
@@ -40,17 +40,22 @@ func offt (base, ljdir=, rjdir=, dims=, usefftw=, inplace=)
   ob= base(:);
 
   save, ob, ljdir=ljdir, rjdir=rjdir, dims=dims,
-              usefftw=usefftw, inplace=inplace;
+              usefftw=usefftw, inplace=inplace, fcplx=fcplx;
+
+  if (fcplx==1 && usefftw!=1)
+    error,"fcplx=1 only possible with fftw";
 
   if (!is_void(dims)) {
     if (usefftw) {
+      if (fcplx==1 && dims(2)!=2)
+        error,"fcplx=1 requires leading length-2 dimension";
       if (inplace) {
         local p;
-        fftw, dims, ljdir, rjdir, p;
+        fftw, dims, ljdir, rjdir, p, fcplx=fcplx;
         save, ob, setup=p;
         p= [];
       } else {
-        save, ob, setup= fftw(dims, ljdir, rjdir);
+        save, ob, setup= fftw(dims, ljdir, rjdir, fcplx=fcplx);
       }
     } else {
       save, ob, setup= fft_setup(dims, ljdir, rjdir);
@@ -62,17 +67,20 @@ func offt (base, ljdir=, rjdir=, dims=, usefftw=, inplace=)
   return closure(ob, _eval);
 }
 
-func _eval (&x, ljdir0, rjdir0, reset=)
+func _eval (&x, ljdir0, rjdir0, reset=, fcplx=)
 {
   use, setup;
   restore, use, ljdir, rjdir, dims, inplace, usefftw;
+
+  if (!is_void(use(fcplx)) && !is_void(fcplx) && fcplx!=use(fcplx))
+    error,"re-specifyed fcplx is inconsitent with init";
   
+  if (is_void(fcplx)) restore, use, fcplx;
+  if (is_void(use(fcplx))) save, use, fcplx;
+
   if (reset==1) {
-    if (usefftw)
-      if (dims(2)==2)
-        fftwf_clean, setup;
-      else
-        fftw_clean, setup;
+    if (usefftw==1)
+      fftw_clean, setup, fcplx=fcplx;
     else
       setup= [];
     return;
@@ -91,35 +99,36 @@ func _eval (&x, ljdir0, rjdir0, reset=)
     error,"init with diff. rjdir";
 
   if (!is_void(inplace)) {
-    if (inplace && !am_subroutine()) 
+    if (inplace==1 && !am_subroutine()) 
       error,"setup/plan was in-place, called as function.";
   } else {
     save, use, inplace=am_subroutine();
+    restore, use, inplace;
   }
 
   if (is_void(setup)) {
-    if (usefftw) {
-      if (inplace) {
+    if (usefftw==1) {
+      if (inplace==1) {
         local p;
-        fftw, dims, ljdir, rjdir, p;      
+        fftw, dims, ljdir, rjdir, p, fcplx=fcplx;      
         setup= p;      
       } else {
-        setup= fftw(dims, ljdir, rjdir);      
+        setup= fftw(dims, ljdir, rjdir, fcplx=fcplx);      
       }
     } else {
       setup= fft_setup(dims, ljdir, rjdir);
     }
   }
 
-  if (inplace) {
+  if (inplace==1) {
     if (usefftw) {
-      fftw, x, ljdir, rjdir, setup;
+      fftw, x, ljdir, rjdir, setup, fcplx=fcplx, keep=1;
     } else {
       fft_inplace, x, ljdir, rjdir, setup=setup;
     }
   } else {
-    if (usefftw) {
-      return fftw(x, ljdir, rjdir, setup);
+    if (usefftw==1) {
+      return fftw(x, ljdir, rjdir, setup, fcplx=fcplx, keep=1);
     } else {
       return fft(x, ljdir, rjdir, setup=setup);
     }

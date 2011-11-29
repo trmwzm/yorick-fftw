@@ -8,6 +8,10 @@ yorick's built-in fft functionality, with an added  capability for computing
 FFTs of type float-complex, which are  here represented in yorick as float 
 array with a leading length-2  dimension. 
 
+The name of the plug-in is YFFTW, as in:
+
+#include "yfftw.i"
+
 INSTALLATION
 
 yorick -batch make.i
