@@ -18,9 +18,10 @@ FFTWF_WISDOM_FNM = fftw_home+"/etc/fftw/wisdom_f_yorick";
 
 func fftw_wisdom (void)
 /* DOCUMENT func fftw_wisdom(void)
-   this function should be run at the start of each yorick session.
-   It reads out the wisdom file, if any, or calls _init_fftwf_plans
-   to optimize the wisdow if it does not find the file.
+   this function will run each time this file is included.
+   It reads wisdom files.  To create wisdom files in case they do not exist,
+   call _init_fftwf_plans, this will create optimized FFTW plans and save 
+   them in the wisdom files if wisdom files are not found.
    SEE ALSO: _init_fftwf_plans, fftw_init_wisdom, fftw,
  */
 {
@@ -30,9 +31,9 @@ func fftw_wisdom (void)
     write,"fftwf wisdom file loaded: "+wisdom_file;
   } else { //file does not exist or couldn not import
     write,"FFTW3 [float] wisdom file not found: "+wisdom_file;
-    write,"Private write/readable copy of wisdom file required to store new plans.";
+    write,"A write/readable copy of wisdom file required to store new plans.";
     write,"Run shell> fftwf-wisdom (in fftw distribution) to generate wisdom file.";
-    write," see FFTWF_WISDOM_FNM file name in yfftw.i";
+    write," see FFTWF_WISDOM_FNM file name definition in yfftw.i";
     write,"shell> fftwf-wisdom -v -c -n -t 1.5 -o $HOME/etc/fftw/wisdom_f";
     write,"File FFTWF_WISDOM_FNM can also be updated or created using:";
     write,"  yorick> fftwf_init_wisdom, [log2nmax_1D,log2nmax_2D,...];";
@@ -43,7 +44,7 @@ func fftw_wisdom (void)
     write,"fftw wisdom file loaded: "+wisdom_file;
   } else { //file does not exist
     write,"FFTW3 [double] wisdom file not found: "+wisdom_file;
-    write,"Private write/readable copy of wisdom file required to store new plans.";
+    write,"A write/readable copy of wisdom file required to store new plans.";
     write,"Run shell> fftw-wisdom (in fftw distribution) to generate wisdom file.";
     write," see FFTW_WISDOM_FNM file name in yfftw.i";
     write,"shell> fftw-wisdom -v -c -n -t 1.5 -o $HOME/etc/fftw/wisdom";
@@ -58,14 +59,13 @@ func fftw_wisdom (void)
 func fftw_init_wisdom (nlimit)
 /* DOCUMENT func init_fftw_wisdom(nlimit)
    Optimization and caching of FFTW plans for n-equi-dimensional arrays. 
-       nlimit==[log2_1d_nmax, log2_2d_nmax,....log2_md_nmax].
-       nlimit defaults to [FFTW_NLIMIT_1D, FFTW_NLIMIT_2D]. 
+     nlimit==[log2_1d_nmax, log2_2d_nmax,....log2_md_nmax].
+     nlimit defaults to [FFTW_NLIMIT_1D, FFTW_NLIMIT_2D]. 
    Plans are saved to the wisdom file. (See FFTW_WISDOM_FNM.)
    example: fftw_init_wisdom, [4,3];
-       saves plans for fftw{array(complex,[1,4-or-8-or-16])}
-               and fftw{array(complex,[2,4-or-8,4-or-8])}
-           and for in-place or out-of-place fft's.
-  
+     saves plans for fftw{array(complex,[1,4-or-8-or-16])}
+                 and fftw{array(complex,[2,4-or-8,4-or-8])}
+     and for in-place or out-of-place fft's.
    SEE ALSO: _init_fftw_plans,fftwf_init_wisdom
  */
 {
@@ -84,14 +84,13 @@ func fftw_init_wisdom (nlimit)
 func fftwf_init_wisdom (nlimit)
 /* DOCUMENT fftwf_init_wisdom (nlimit)
    Optimization and caching of FFTW plans for n-equi-dimensional arrays. 
-       nlimit==[log2_1d_nmax, log2_2d_nmax,....log2_md_nmax].
-       nlimit defaults to [FFTW_NLIMIT_1D, FFTW_NLIMIT_2D]. 
+     nlimit==[log2_1d_nmax, log2_2d_nmax,....log2_md_nmax].
+     nlimit defaults to [FFTW_NLIMIT_1D, FFTW_NLIMIT_2D]. 
    Plans are saved to the wisdom file. (See FFTW_WISDOM_FNM.)
    example: fftw_init_wisdom, [4,3];
        saves plans for fftw{array(complex,[1,4-or-8-or-16])}
                and fftw{array(complex,[2,4-or-8,4-or-8])}
-           and for in-place or out-of-place fft's.
-  
+   and for in-place or out-of-place fft's.
    SEE ALSO: 
  */
 {
@@ -116,22 +115,22 @@ func fftw (x, ljdir, rjdir, &plan, nosave=, fcplx=, keep=)
    
    PLAN == array(long, 2) 
            where plan(1) is 0 if there is no dir=+1 transforms
-                     or is a casted pointer to an fftw plan
+                      or is a casted pointer to an fftw plan
            where plan(2) is 0 if there is no dir=-1 transforms
-                     or is a casted pointer to an fftw plan
+                      or is a casted pointer to an fftw plan
            *ATTN* plan differ for in- and out-of-place transforms!!
 
    USAGE TABLE:   OUT-of-place                      IN-place
      --planning and execution:.....................................
-     y= fftw(x, direction)                fftw, x, direction
-     y= fftw(x, ljdir, rjdir)             fftw, x, ljdir, rjdir               
+     y= fftw(x, dir)                     fftw, x, dir
+     y= fftw(x, ljdir, rjdir)            fftw, x, ljdir, rjdir               
      --planning only:..............................................
      *attn* *plan is different out- or in-place*
-     plan= fftw(dimsof(x), direction)     fftw, dimsof(x), direction, [], plan        
-     plan= fftw(dimsof(x), ljdir, rjdir)  fftw, dimsof(x), ljdir, rjdir, plan 
+     plan= fftw(dimsof(x), dir)          fftw, dimsof(x), dir, [], plan        
+     plan= fftw(dimsof(x), ljdir, rjdir) fftw, dimsof(x), ljdir, rjdir, plan 
      --plan execution only:........................................
-     y= fftw(x, direction,[], plan)       fftw, x, direction,[],plan
-     y= fftw(x, ljdir, rjdir, plan)       fftw, x, ljdir, rjdir, plan         
+     y= fftw(x, dir,[], plan)            fftw, x, dir,[],plan
+     y= fftw(x, ljdir, rjdir, plan)      fftw, x, ljdir, rjdir, plan         
      
    NOTE ABOUT USAGE TABLE ABOVE:
     + X is of type==complex OR array(float,[nd+1,2,d_1,...,d_nd])
@@ -327,6 +326,11 @@ func fftw (x, ljdir, rjdir, &plan, nosave=, fcplx=, keep=)
 }
 
 func fftw_clean (&p, fcplx=)
+/* DOCUMENT fftw_clean, p, fcplx=;
+   free-up memory space allocated by FFTW plan P.
+   FCPLX=1 if the plan was for a float-complex transform.
+   Once space is deallocated, returns a null plan P==[0,0];
+ */
 {
   if (fcplx!=1) 
     for (i=1;i<=numberof(p);i++) 

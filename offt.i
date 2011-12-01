@@ -30,10 +30,14 @@ func offt (base, void, ljdir=, rjdir=, dims=, usefftw=, inplace=, fcplx=)
  *
  *   Examples:
  *
- *       OBJ = offt(ljdir=, rjdir=, usefftw=1)
+ *       d= [2,12,32]; x=random_n(d)+1i*random_n(d);
+ *       fto= offt(usefftw=1);
+ *       write,avg(abs(fft(x)-fto(x))),format="%15.8g\n";
+ *       fto, reset=1;
  *
- *       OBJ(x)
- *
+ *       fto= offt(dims=d,ljdir=1,usefftw=1,inplace=1)
+ *       fto, x;
+ *       fto, reset=1;
  * SEE ALSO: fftw, fft. 
  */
 {
