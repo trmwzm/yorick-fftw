@@ -1,0 +1,47 @@
+---
+layout: default
+headline: FFTW3 plug-in
+---
+<p class="sectop">Back to <a href="index.html">library index</a>.</p>
+<p class="sectop">Package rollarr (in rollarr.i) - </p>
+<p class="sectop">Index of documented functions or symbols:</p>
+<div class="ndex0s">
+  <div class="ndex1">
+    <h3>R</h3>
+  </div>
+  <div class="ndex2">
+    <p><a href="rollarr.html#rollarr">rollarr</a></p>
+  </div>
+</div>
+<div class="docblock"><a name="rollarr"></a><h3>rollarr</h3>
+  <pre>DOCUMENT rollarr (x, ljoff, rjoff, fcplx=)
+      or rollarr, x, ljoff, rjoff
+      or rollarr(x)
+      or rollarr, x
+
+  "rolls" selected dimensions of the array X.  The roll offsets
+  LJOFF and RJOFF (both optional) work in the same fashion as the
+  LJDIR and RJDIR arguments to the fft function:
+
+     A scalar LJDIR (and nil RJDIR) rolls all dimensions of X by
+     the specified offset.
+     Otherwise, the elements of the LJDIR vector [ljoff1, ljoff2, ...]
+     are used as the roll offsets for the first, second, etc.
+     dimensions of X.
+     Similarly, the elements of the RJDIR vector [..., rjoff1, rjoff0]
+     are matched to the final dimensions of X, so the next to last
+     dimension is rolled by rjoff1 and the last dimension by rjoff0.
+
+     As a special case (mostly for use with the fft function), if
+     both LJDIR and RJDIR are nil, every dimension is rolled by
+     half of its length.  Thus,
+        roll(x)
+     it equivalent to
+        roll(x, dimsof(x)(2:0)/2)
+
+  The result of the roll function is complex if X is complex, otherwise
+  double (i.e.- any other array type is promoted to type double).  If
+  roll is invoked as a subroutine, the operation is performed in place.
+</pre>
+  <p>SEE ALSO: fft</p>
+</div>

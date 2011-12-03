@@ -1,0 +1,49 @@
+---
+layout: default
+headline: FFTW3 plug-in
+---
+<p class="sectop">Back to <a href="index.html">library index</a>.</p>
+<p class="sectop">Package offt (in offt.i) - </p>
+<p class="sectop">Index of documented functions or symbols:</p>
+<div class="ndex0s">
+  <div class="ndex1">
+    <h3>O</h3>
+  </div>
+  <div class="ndex2">
+    <p><a href="offt.html#offt">offt</a></p>
+  </div>
+</div>
+<div class="docblock"><a name="offt"></a><h3>offt</h3>
+  <pre>DOCUMENT obj= offt(ljdir=,rjdir=,dims=,usefftw=,inplace=)
+
+  Return a new FFT operator object and initialize workspace
+  to compute FFT using Yorick's builtin Swarztrauber FFT, or
+  using the yfftw FFTW plugin-- the "fastest FFT in the West."
+
+  Keyword DIMS can be used to pre-specify the dimension list of the
+  arrays to be transformed.  If left unspecified, the dimension
+  list is initialized with the workspace the first time the
+  transform operator is applied.  In all cases, an
+  operator can only be used on arrays with same dimension lists,
+  and the same target dimension (same as FFTW, and more restrictive
+  than builtin fft for which workspace in not direction or array- 
+  geometry specific.)  
+  
+  with usefftw==1, all arrays with a leading dimension of 
+  length 2 will be taken to be of type complex{float re;float im}
+
+  with usefftw==1, the workspace has to be manually cleaned up to
+  free up memory (a shortcoming of yfftw plug_in):  OBJ, reset=1;
+
+  Examples:
+
+      d= [2,12,32]; x=random_n(d)+1i*random_n(d);
+      fto= offt(usefftw=1);
+      write,avg(abs(fft(x)-fto(x))),format="%15.8g\n";
+      fto, reset=1;
+
+      fto= offt(dims=d,ljdir=1,usefftw=1,inplace=1)
+      fto, x;
+      fto, reset=1;</pre>
+  <p>SEE ALSO: <a href="yfftw.html#fftw">fftw</a>, fft.</p>
+</div>

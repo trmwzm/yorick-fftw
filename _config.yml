@@ -1,0 +1,8 @@
+prefix: "http://dhmunro.github.com/yorick-doc"
+pkgname: "yorick-fftw"
+pkgtitle: "FFTW3 plug-in"
+
+keywords: yorick, documentation, manual
+description: Yorick Documentation
+
+exclude: gh-pages, gh-pages.src, ydoc.pl, README.md

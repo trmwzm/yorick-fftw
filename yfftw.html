@@ -1,0 +1,153 @@
+---
+layout: default
+headline: FFTW3 plug-in
+---
+<p class="sectop">Back to <a href="index.html">library index</a>.</p>
+<p class="sectop">Package yfftw (in yfftw.i) - </p>
+<p class="sectop">Index of documented functions or symbols:</p>
+<div class="ndex0s">
+  <div class="ndex1">
+    <h3>F</h3>
+    <p><a href="yfftw.html#fftw">fftw</a></p>
+  </div>
+  <div class="ndex2">
+    <p><a href="yfftw.html#fftwf_init_wisdom">fftwf_init_wisdom</a></p>
+    <p><a href="yfftw.html#fftw_clean">fftw_clean</a></p>
+  </div>
+  <div class="ndex3">
+    <p><a href="yfftw.html#fftw_init_wisdom">fftw_init_wisdom</a></p>
+    <p><a href="yfftw.html#fftw_wisdom">fftw_wisdom</a></p>
+  </div>
+</div>
+<div class="docblock"><a name="fftw"></a><h3>fftw</h3>
+  <pre>DOCUMENT y= fftw(x, ljdir, rjdir, &plan, nosave=, fcplx=, keep=)
+main yorick_fftw(3) interface, much of it similar to fft.i.
+returns Y the complex Fastest Fourier Transform of array X.
+If FCPLX==1 input arrays X==array(float,2,..) are treated 
+as float-complex.
+
+PLAN == array(long, 2) 
+        where plan(1) is 0 if there is no dir=+1 transforms
+                   or is a casted pointer to an fftw plan
+        where plan(2) is 0 if there is no dir=-1 transforms
+                   or is a casted pointer to an fftw plan
+        *ATTN* plan differ for in- and out-of-place transforms!!
+
+USAGE TABLE:   OUT-of-place                      IN-place
+  --planning and execution:.....................................
+  y= fftw(x, dir)                     fftw, x, dir
+  y= fftw(x, ljdir, rjdir)            fftw, x, ljdir, rjdir               
+  --planning only:..............................................
+  *attn* *plan is different out- or in-place*
+  plan= fftw(dimsof(x), dir)          fftw, dimsof(x), dir, [], plan        
+  plan= fftw(dimsof(x), ljdir, rjdir) fftw, dimsof(x), ljdir, rjdir, plan 
+  --plan execution only:........................................
+  y= fftw(x, dir,[], plan)            fftw, x, dir,[],plan
+  y= fftw(x, ljdir, rjdir, plan)      fftw, x, ljdir, rjdir, plan         
+  
+NOTE ABOUT USAGE TABLE ABOVE:
+ + X is of type==complex OR array(float,[nd+1,2,d_1,...,d_nd])
+ + right-column usage in-place
+ + left-column usage out-of-place
+ + setting plan=[0,0] on input forces planning
+ + Since plans are archived as soon as they are optimized it is 
+   NOT a good idea not to do repeated calls to planning. If it
+   is required use NOSAVE==1 to turn off wisdom caching. 
+               
+DIRECTION determines which direction the transform is in --
+  e.g.- from time to frequency or vice-versa -- see below:
+
+DIRECTION    meaning                              
+---------    -------                              
+    1    "forward" transform (coefficients of exp(+i * 2*pi*kl/N))    
+     on every dimension of X                      
+   -1    "backward" transform (coefficients of exp(-i * 2*pi*kl/N))   
+     on every dimension of X                      
+[1,-1,1] forward transform on first and third dimensions of X,        
+     backward transform on second dimension of X (any other       
+     dimensions remain untransformed)                 
+[-1,0,0,1]   backward transform on first dimension of X, forward      
+     transform on fourth dimension of X               
+   etc.                                   
+
+The third positional argument, if present, allows the direction       
+of dimensions of X to be specified relative to the final dimension        
+of X, instead of relative to the first dimension of X.  In this       
+case, both LJDIR and RJDIR must be vectors of integers -- the         
+scalar form is illegal:                           
+
+   LJDIR    RJDIR      meaning                        
+   -----    -----      -------                        
+   []       [1]   forward transform last dimension of X          
+   [1]      []   forward transform first dimension of X         
+   []       [-1,-1]   backward transform last two dimensions of X,       
+                      leaving any other dimensions untransformed         
+[-1,0,0,1]  []   backward transform on first dimension of X,        
+                 forward transform on fourth dimension of X         
+   []       [-1,0,0,1]   backward transform 4th to last dimension of X,  
+                         forward transform on last dimension of X       
+   etc.                                   
+
+Note that the final element of RJDIR corresponds to the last dimension    
+of X, while the initial element of LJDIR corresponds to the first         
+dimension of X.                               
+
+The explicit meaning of "forward" transform -- the coefficients of        
+exp(+i * 2*pi*kl/N) -- is:                            
+
+for j=1,...,n ;   result(j)= sum from k=1,...,n of                                   
+                                 x(k)*exp(-i*(j-1)*(k-1)*2*pi/n)              
+      where i=sqrt(-1)                   
+
+Note that the result is unnormalized.  Applying the "backward"        
+transform to the result of a "forward" transform returns N times      
+the original vector of length N.  Equivalently, applying either       
+the "forward" or "backward" transform four times in succession        
+yields N^2 times the original vector of length N.                 
+
+Performing transforms requires PLANNING, which can be set up        
+beforehand by calling fftw on a dimsof(X) array.  This allow fftw
+to be called more than once with arrays X of the same shape with
+KEEP==1.
+</pre>
+  <p>SEE ALSO: fft, fft_inplace, fft_setup, <a href="yfftw.html#fftw">fftw</a>[f]_init_wisdom, <a href="yfftw.html#fftw_wisdom">fftw_wisdom</a>, _fftwfI, _fftwfO, _fftwfP, _fftwfE, _fftwfD, _fftwfS, _fftwfC, _fftwT, _fftwI, _fftwO, _fftwP, _fftwE, _fftwD, _fftwS, _fftwC</p>
+</div>
+<div class="docblock"><a name="fftwf_init_wisdom"></a><h3>fftwf_init_wisdom</h3>
+  <pre>DOCUMENT fftwf_init_wisdom (nlimit)
+Optimization and caching of FFTW plans for n-equi-dimensional arrays. 
+  nlimit==[log2_1d_nmax, log2_2d_nmax,....log2_md_nmax].
+  nlimit defaults to [FFTW_NLIMIT_1D, FFTW_NLIMIT_2D]. 
+Plans are saved to the wisdom file. (See FFTW_WISDOM_FNM.)
+example: fftw_init_wisdom, [4,3];
+    saves plans for fftw{array(complex,[1,4-or-8-or-16])}
+            and fftw{array(complex,[2,4-or-8,4-or-8])}
+and for in-place or out-of-place fft's.</pre>
+  
+</div>
+<div class="docblock"><a name="fftw_clean"></a><h3>fftw_clean</h3>
+  <pre>DOCUMENT fftw_clean, p, fcplx=;
+free-up memory space allocated by FFTW plan P.
+FCPLX=1 if the plan was for a float-complex transform.
+Once space is deallocated, returns a null plan P==[0,0];</pre>
+  
+</div>
+<div class="docblock"><a name="fftw_init_wisdom"></a><h3>fftw_init_wisdom</h3>
+  <pre>DOCUMENT func init_fftw_wisdom(nlimit)
+Optimization and caching of FFTW plans for n-equi-dimensional arrays. 
+  nlimit==[log2_1d_nmax, log2_2d_nmax,....log2_md_nmax].
+  nlimit defaults to [FFTW_NLIMIT_1D, FFTW_NLIMIT_2D]. 
+Plans are saved to the wisdom file. (See FFTW_WISDOM_FNM.)
+example: fftw_init_wisdom, [4,3];
+  saves plans for fftw{array(complex,[1,4-or-8-or-16])}
+              and fftw{array(complex,[2,4-or-8,4-or-8])}
+  and for in-place or out-of-place fft's.</pre>
+  <p>SEE ALSO: _init_fftw_plans, <a href="yfftw.html#fftwf_init_wisdom">fftwf_init_wisdom</a></p>
+</div>
+<div class="docblock"><a name="fftw_wisdom"></a><h3>fftw_wisdom</h3>
+  <pre>DOCUMENT func fftw_wisdom(void)
+this function will run each time this file is included.
+It reads wisdom files.  To create wisdom files in case they do not exist,
+call _init_fftwf_plans, this will create optimized FFTW plans and save 
+them in the wisdom files if wisdom files are not found.</pre>
+  <p>SEE ALSO: _init_fftwf_plans, <a href="yfftw.html#fftw_init_wisdom">fftw_init_wisdom</a>, <a href="yfftw.html#fftw">fftw</a>, </p>
+</div>
