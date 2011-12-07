@@ -2,6 +2,10 @@
 #include <fftw3.h>
 #include <stdlib.h>
 
+/* REVISIONS
+   12.06.201  D. Munro - close file handles.
+ */
+
 /* GENERAL ------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------*/
 long _fftwT (double tlim) /* set time limit on planning */
@@ -120,6 +124,7 @@ long _fftwfI (char *wisdom_file) /* import */
     exit(0);
   }
   fftwf_import_wisdom_from_file(fp);
+  fclose(fp);
   return (1);
 }
 /*--------------------------------------------------------------------------*/
@@ -133,6 +138,7 @@ long _fftwfO (char *wisdom_file) /* export */
   }
   fftwf_export_wisdom_to_file(fp);
   fflush(fp);
+  fclose(fp);
   return (1);
 }
 /*--------------------------------------------------------------------------*/
