@@ -22,6 +22,7 @@ long _fftwI (char *wisdom_file) /* import */
     exit(0);
   }
   fftw_import_wisdom_from_file(fp);
+  fclose(fp);
   return (1);
 }
 /*--------------------------------------------------------------------------*/
@@ -35,6 +36,7 @@ long _fftwO (char *wisdom_file) /* export */
   }
   fftw_export_wisdom_to_file(fp);
   fflush(fp);
+  fclose(fp);
   return (1);
 }
 /*--------------------------------------------------------------------------*/

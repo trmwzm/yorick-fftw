@@ -77,7 +77,7 @@ func _eval (&x, ljdir0, rjdir0, reset=, fcplx=)
   restore, use, ljdir, rjdir, dims, inplace, usefftw;
 
   if (!is_void(use(fcplx)) && !is_void(fcplx) && fcplx!=use(fcplx))
-    error,"re-specifyed fcplx is inconsitent with init";
+    error,"fcplx _eval keyword inconsitent with init";
   
   if (is_void(fcplx)) restore, use, fcplx;
   if (is_void(use(fcplx))) save, use, fcplx;
