@@ -38,6 +38,9 @@ func offt (base, void, ljdir=, rjdir=, dims=, usefftw=, inplace=, fcplx=)
  *       fto= offt(dims=d,ljdir=1,usefftw=1,inplace=1)
  *       fto, x;
  *       fto, reset=1;
+ *
+ *   NOTE: don't understand why usefftw cannot be in use statement
+ *   at line 1 of _eval func.
  * SEE ALSO: fftw, fft. 
  */
 {
@@ -50,10 +53,10 @@ func offt (base, void, ljdir=, rjdir=, dims=, usefftw=, inplace=, fcplx=)
     error,"fcplx=1 only possible with fftw";
 
   if (!is_void(dims)) {
-    if (usefftw) {
+    if (usefftw==1) {
       if (fcplx==1 && dims(2)!=2)
         error,"fcplx=1 requires leading length-2 dimension";
-      if (inplace) {
+      if (inplace==1) {
         local p;
         fftw, dims, ljdir, rjdir, p, fcplx=fcplx;
         save, ob, setup=p;
@@ -73,12 +76,12 @@ func offt (base, void, ljdir=, rjdir=, dims=, usefftw=, inplace=, fcplx=)
 
 func _eval (&x, ljdir0, rjdir0, reset=, fcplx=)
 {
-  use, setup;
-  restore, use, ljdir, rjdir, dims, inplace, usefftw;
+  use, ljdir, rjdir, dims, setup, inplace;
+  local usefftw;  // ?? usefftw not allowed in use above ?? is extern !
+  restore, use, usefftw;
 
   if (!is_void(use(fcplx)) && !is_void(fcplx) && fcplx!=use(fcplx))
-    error,"fcplx _eval keyword inconsitent with init";
-  
+    error,"fcplx offt(eval) keyword inconsitent with init";
   if (is_void(fcplx)) restore, use, fcplx;
   if (is_void(use(fcplx))) save, use, fcplx;
 
@@ -91,23 +94,26 @@ func _eval (&x, ljdir0, rjdir0, reset=, fcplx=)
   }
 
   dims0= dimsof(x);
-  if (is_void(dims)) {dims= dims0; save, use, dims;}
-  if (anyof(dims0!=dims)) error,"init with diff. dims";
+  if (!is_void(dims) && anyof(dims0!=dims))
+    error,"init with diff. dims";
+  if (is_void(dims)) 
+    dims= dims0;
 
-  if (is_void(ljdir)) {ljdir= ljdir0; save, use, ljdir;}
-  if (!is_void(ljdir0) && anyof(ljdir0!=ljdir)) 
+  if (!is_void(ljdir0) && !is_void(ljdir) && anyof(ljdir0!=ljdir)) 
     error,"init with diff. ljdir";
+  if (is_void(ljdir))
+    ljdir= ljdir0;
 
-  if (is_void(rjdir)) {rjdir= rjdir0; save, use, rjdir;}
-  if (!is_void(rjdir0) && anyof(rjdir0!=rjdir))
+  if (!is_void(rjdir0) && !is_void(rjdir) && anyof(rjdir0!=rjdir)) 
     error,"init with diff. rjdir";
+  if (is_void(rjdir))
+    rjdir= rjdir0;
 
   if (!is_void(inplace)) {
-    if (inplace==1 && !am_subroutine()) 
-      error,"setup/plan was in-place, called as function.";
+    if (inplace!=am_subroutine()) 
+      error,"setup/plan in/out-place, called as out/in place.";
   } else {
-    save, use, inplace=am_subroutine();
-    restore, use, inplace;
+    inplace= am_subroutine();
   }
 
   if (is_void(setup)) {
@@ -125,7 +131,7 @@ func _eval (&x, ljdir0, rjdir0, reset=, fcplx=)
   }
 
   if (inplace==1) {
-    if (usefftw) {
+    if (usefftw==1) {
       fftw, x, ljdir, rjdir, setup, fcplx=fcplx, keep=1;
     } else {
       fft_inplace, x, ljdir, rjdir, setup=setup;
