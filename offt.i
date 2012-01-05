@@ -11,7 +11,7 @@ func offt (base, void, ljdir=, rjdir=, dims=, usefftw=, inplace=, fcplx=)
  *
  *   Return a new FFT operator object and initialize workspace
  *   to compute FFT using Yorick's builtin Swarztrauber FFT, or
- *   using the yfftw FFTW plugin-- the "fastest FFT in the West."
+ *   using the yfftw FFTW plugin -- the "fastest FFT in the West."
  *
  *   Keyword DIMS can be used to pre-specify the dimension list of the
  *   arrays to be transformed.  If left unspecified, the dimension

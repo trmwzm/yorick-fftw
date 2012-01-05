@@ -252,7 +252,7 @@ func _offt_check (d,usefftw=)
   }
 }
 
-if(batch()){
+if (batch()) {
   _fftw_check;
   _offt_check;
   _offt_check,usefftw=1;
