@@ -195,7 +195,9 @@ func fftw (x, ljdir, rjdir, &plan, nosave=, fcplx=, keep=)
    Performing transforms requires PLANNING, which can be set up        
    beforehand by calling fftw on a dimsof(X) array.  This allow fftw
    to be called more than once with arrays X of the same shape with
-   KEEP==1.
+   KEEP==1, which prevents the deallocation of the memory used by the plan.
+
+   NOSAVE==1 prevents wisdom caching, if planning repeatedly.
 
    SEE ALSO:  fft, fft_inplace, fft_setup, fftw[f]_init_wisdom, fftw_wisdom,
              _fftwfI, _fftwfO, _fftwfP, _fftwfE, _fftwfD, _fftwfS, _fftwfC,
