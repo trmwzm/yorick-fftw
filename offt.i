@@ -7,7 +7,7 @@ scratch= save(scratch, tmp);
 tmp= save(_eval);
 
 func offt (base, void, ljdir=, rjdir=, dims=, usefftw=, inplace=, fcplx=)
-/* DOCUMENT obj= offt(ljdir=,rjdir=,dims=,usefftw=,inplace=)
+/* DOCUMENT obj= offt(ljdir=,rjdir=,dims=,usefftw=,inplace=,fcplx=)
  *
  *   Return a new FFT operator object and initialize workspace
  *   to compute FFT using Yorick's builtin Swarztrauber FFT, or
@@ -22,10 +22,10 @@ func offt (base, void, ljdir=, rjdir=, dims=, usefftw=, inplace=, fcplx=)
  *   than builtin fft for which workspace in not direction or array- 
  *   geometry specific.)  
  *   
- *   with usefftw==1, all arrays with a leading dimension of 
+ *   with USEFFTW==1 and  FCPLX==1 all arrays with a leading dimension of 
  *   length 2 will be taken to be of type complex{float re;float im}
  *
- *   with usefftw==1, the workspace has to be manually cleaned up to
+ *   with USEFFTW==1, the workspace has to be manually cleaned up to
  *   free up memory (a shortcoming of yfftw plug_in):  OBJ, reset=1;
  *
  *   Examples:
