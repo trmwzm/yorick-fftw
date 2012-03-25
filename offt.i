@@ -76,9 +76,7 @@ func offt (base, void, ljdir=, rjdir=, dims=, usefftw=, inplace=, fcplx=)
 
 func _eval (&x, ljdir0, rjdir0, reset=, fcplx=)
 {
-  use, ljdir, rjdir, dims, setup;
-  local usefftw, inplace;  // ?usefftw and inplace not ok here?
-  restore, use, usefftw, inplace;
+  use, ljdir, rjdir, dims, setup, inplace;
 
   if (!is_void(use(fcplx)) && !is_void(fcplx) && fcplx!=use(fcplx))
     error,"fcplx offt(eval) keyword inconsitent with init";
@@ -86,7 +84,7 @@ func _eval (&x, ljdir0, rjdir0, reset=, fcplx=)
   if (is_void(use(fcplx))) save, use, fcplx;
 
   if (reset==1) {
-    if (usefftw==1)
+    if (use(usefftw)==1)
       fftw_clean, setup, fcplx=fcplx;
     else
       setup= [];
@@ -114,11 +112,10 @@ func _eval (&x, ljdir0, rjdir0, reset=, fcplx=)
       error,"setup/plan in/out-place, called as out/in place.";
   } else {
     inplace= am_subroutine();
-    save, use, inplace;
   }
 
   if (is_void(setup)) {
-    if (usefftw==1) {
+    if (use(usefftw)==1) {
       if (inplace==1) {
         local p;
         fftw, dims, ljdir, rjdir, p, fcplx=fcplx;      
@@ -132,13 +129,13 @@ func _eval (&x, ljdir0, rjdir0, reset=, fcplx=)
   }
 
   if (inplace==1) {
-    if (usefftw==1) {
+    if (use(usefftw)==1) {
       fftw, x, ljdir, rjdir, setup, fcplx=fcplx, keep=1;
     } else {
       fft_inplace, x, ljdir, rjdir, setup=setup;
     }
   } else {
-    if (usefftw==1) {
+    if (use(usefftw)==1) {
       return fftw(x, ljdir, rjdir, setup, fcplx=fcplx, keep=1);
     } else {
       return fft(x, ljdir, rjdir, setup=setup);
