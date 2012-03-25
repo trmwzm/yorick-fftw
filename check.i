@@ -87,7 +87,7 @@ func _fftw_check (void)
   force2d = 0;
   fftw_test, 95;
   fftw_test, 32;
-  fftw_test, 12;
+  fftw_test, 14;
   fftw_test, 1024;
   fftw_test, 4096;
   for (i=0 ; i<32 ; i++) fftw_test, 4096, nosave=1;
@@ -127,8 +127,8 @@ func ck1(d,ld)
 
 func ck_init (void)
 {
-  fftw_init_wisdom, [12,11];
-  fftwf_init_wisdom, [12,11];
+  fftw_init_wisdom, [11,10];
+  fftwf_init_wisdom, [11,10];
   return;
 }
 
