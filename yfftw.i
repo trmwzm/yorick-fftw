@@ -13,8 +13,8 @@ FFTW_TIMELIMIT = 3*60.0;   /* double seconds */
 fftw_home= get_env("HOME");
 //fftw_home= "/my/wisdom";
 
-FFTW_WISDOM_FNM = fftw_home+"/etc/fftw/wisdom_yorick";
-FFTWF_WISDOM_FNM = fftw_home+"/etc/fftw/wisdom_f_yorick";
+FFTW_WISDOM_FNM = fftw_home+"/usr/etc/fftw/wisdom_yorick";
+FFTWF_WISDOM_FNM = fftw_home+"/usr/etc/fftw/wisdom_f_yorick";
 
 func fftw_wisdom (void)
 /* DOCUMENT func fftw_wisdom(void)
