@@ -86,8 +86,10 @@ fftw_plan _fftwP (fftw_complex *in,   /* plan */
   return p;
 }
 /*--------------------------------------------------------------------------*/
-void _fftwE (fftw_plan p, fftw_complex *in, fftw_complex *out)  /*execute*/
+void _fftwE (int pi, fftw_complex *in, fftw_complex *out)  /*execute*/
 {
+  fftw_plan p;
+  p= (fftw_plan)pi;
   fftw_execute_dft(p, in, out);
   return;
 }
