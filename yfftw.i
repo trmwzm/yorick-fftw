@@ -108,7 +108,11 @@ func fftwf_init_wisdom (nlimit)
   return _fftwfO(FFTWF_WISDOM_FNM);
 }
 
-func fftw_wisdom_string (fcplx=)
+func fftw_wisdom_string (void,fcplx=)
+/* DOCUMENT s= fftw_wisdom_string ([fcplx=]);
+   return cplx-to-cplx FFTW wisdom as a string
+   SEE ALSO:
+ */
 {
   if (fcplx==1) {
     n= -_fftwfA(['\0'],1);
@@ -125,6 +129,11 @@ func fftw_wisdom_string (fcplx=)
 }
 
 func fftw_wisdom_file (fnm,fcplx=)
+/* DOCUMENT fftw_wisdom_file,fnm,[fcplx=];
+   saves and *CLOBBER* the FFTW wisdom to file.
+   Make sure wisdom has been read in beforehand, use _fftw[f]I
+   SEE ALSO:
+ */
 {
   if (is_void(fnm))
     if (fcplx==1)
