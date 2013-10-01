@@ -18,8 +18,8 @@ FFTWF_WISDOM_FNM = fftw_home+"/usr/etc/fftw/wisdom_f_yorick";
 
 func fftw_wisdom (void)
 /* DOCUMENT func fftw_wisdom(void)
-   this function will run each time this file is included.
-   It reads wisdom files.  To create wisdom files in case they do not exist,
+   The function runs each time this file is included.
+   Reads wisdom files.  To create wisdom files in case they do not exist,
    call _init_fftwf_plans, this will create optimized FFTW plans and save 
    them in the wisdom files if wisdom files are not found.
    SEE ALSO: _init_fftwf_plans, fftw_init_wisdom, fftw,
@@ -106,6 +106,37 @@ func fftwf_init_wisdom (nlimit)
     }
   }
   return _fftwfO(FFTWF_WISDOM_FNM);
+}
+
+func fftw_wisdom_string (fcplx=)
+{
+  if (fcplx==1) {
+    n= -_fftwfA(['\0'],1);
+    if (n<2) return string(0);
+    s= array(char,n);
+    _fftwfA,s,n;    
+  } else {
+    n= -_fftwA(['\0'],1);
+    if (n<2) return string(0);
+    s= array(char,n);
+    _fftwA,s,n;
+  }
+  return strchar(s);
+}
+
+func fftw_wisdom_file (fnm,fcplx=)
+{
+  if (is_void(fnm))
+    if (fcplx==1)
+      fnm= FFTWF_WISDOM_FNM;
+    else
+      fnm= FFTW_WISDOM_FNM;
+  sw= fftw_wisdom_string(fcplx=fcplx);
+  fs= sizeof(open(fnm,"r",1));
+  if ((fs>0 && fs<strlen(sw)) || fs==0)
+    return write(open(fnm,"w"),sw);
+  else
+    return 0;
 }
 
 func fftw (x, ljdir, rjdir, &plan, nosave=, fcplx=, keep=)
@@ -302,10 +333,12 @@ func fftw (x, ljdir, rjdir, &plan, nosave=, fcplx=, keep=)
         if (is_void(stdlp)) stdlp= [0];
         if (dcplx==1) {
           plan(ip)= _fftwP(xip,xop,n,dims(list),stds(list),ndims-n,dimlp,stdlp,idir);
-          if (nosave != 1) _fftwO,FFTW_WISDOM_FNM; 
+          if (nosave != 1)
+            fftw_wisdom_file,fcplx=0; 
         } else {
           plan(ip)= _fftwfP(xip,xop,n,dims(list),stds(list),ndims-n,dimlp,stdlp,idir);
-          if (nosave != 1) _fftwfO,FFTWF_WISDOM_FNM;
+          if (nosave != 1)
+            fftw_wisdom_file,fcplx=1;
         }
       }
       if (planex==1) {
@@ -366,6 +399,16 @@ extern  _fftwO
 */
 /* DOCUMENT long _fftwO (string wisdom_file)
    [0]utput plan(s) to wisdom file "wisdom_file"
+ */
+extern  _fftwA
+/* PROTOTYPE
+   long _fftwA (char array wisdom, long ni)
+*/
+/* DOCUMENT no= _fftwA (&wisdom,ni)
+   export fftw wisdom to string as char array WISDOM. NO is the string length.
+   If memory (char array length) is insufficient returns
+   -1*length-of-full-wisdom
+   USAGE: =-_fftwA(['\0'],1);n=n+1;s=array(char,n);_fftwA,s,n;s=strchar(s);
  */
 extern  _fftwP
 /* PROTOTYPE
@@ -433,6 +476,16 @@ extern _fftwfO
 /* DOCUMENT  long _fftwfO (string wisdom_file)
    [0]utput plan(s) to wisdom file "wisdom_file"
 */
+extern  _fftwfA
+/* PROTOTYPE
+   long _fftwfA (char array wisdom, long ni)
+*/
+/* DOCUMENT no= _fftwfA (&wisdom,ni)
+   export fftwf wisdom to string as char array WISDOM. NO is the string length.
+   If memory (char array length) is insufficient returns
+   -1*length-of-full-wisdom
+   USAGE: =-_fftwfA(['\0'],1);n=n+1;s=array(char,n);_fftwfA,s,n;s=strchar(s);
+ */
 extern _fftwfP
 /* PROTOTYPE
    long _fftwfP (float array in, float array out, long ft_rank, long array ft_dims,

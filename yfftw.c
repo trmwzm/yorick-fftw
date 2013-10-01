@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <fftw3.h>
 #include <stdlib.h>
+#include <string.h>
 
 /* REVISIONS
    12.06.201  D. Munro - close file handles.
@@ -42,6 +43,16 @@ long _fftwO (char *wisdom_file) /* export */
   fflush(fp);
   fclose(fp);
   return (1);
+}
+/*--------------------------------------------------------------------------*/
+long _fftwA (char* w, long ni) /* export wisdom to string */
+{
+  char *ws;
+  ws = fftw_export_wisdom_to_string();
+  long n = strlen(ws);
+  if (n>ni) return -n;
+  strcpy(w,ws);
+  return n;
 }
 /*--------------------------------------------------------------------------*/
 fftw_plan _fftwP (fftw_complex *in,   /* plan */
@@ -144,6 +155,16 @@ long _fftwfO (char *wisdom_file) /* export */
   return (1);
 }
 /*--------------------------------------------------------------------------*/
+long _fftwfA (char* w, long ni) /* export wisdom to string */
+{
+  char *ws;
+  ws = fftwf_export_wisdom_to_string();
+  long n = strlen(ws);
+  if (n>ni) return -n;
+  strcpy(w,ws);
+  return n;
+}
+/*--------------------------------------------------------------------------*/
 fftwf_plan _fftwfP (fftwf_complex *in,   /* plan */
 	          fftwf_complex *out,
 	          long ft_rank, long *ft_dims, long *ft_strides, 
@@ -204,7 +225,6 @@ void _fftwfS (fftwf_plan p)  /*print S==screen ;)*/
   fftwf_print_plan(p);
   return;
 }
-
 /*--------------------------------------------------------------------------*/
 void _fftwfC (void)  /*cleanup*/
 {
