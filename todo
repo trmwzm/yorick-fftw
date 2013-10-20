@@ -1,0 +1,10 @@
+How to provide workspce/setup mamgement in a "clean" interface ? -- dunno --
+-- instantiate self managing fourier operator
+oft= offt();
+oft= offt(dimsof(x), ljdir, rjdir, usefftw=[no], inplace=[no], fcplx=[no]);
+-- add configurations
+oft, add, dimsof(x), ljdir, rjdir, usefftw=[no], inplace=[no], fcplx=[no];
+-- remove configurations
+oft, reset, range-or-index-into-some-plan/workspace
+-- execute, using saved plan]
+oft, exec, x, ljdir, rjdir, usefftw=[no], inplace=[no], fcplx=[no];
