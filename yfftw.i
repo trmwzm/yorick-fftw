@@ -10,7 +10,7 @@ FFTW_TIMELIMIT = 3*60.0;   /* double seconds */
 /* System-wide files might be in /etc and could be copied from there. */
 /* Fftw3 distribution comes with exec. fftw[f]-wisdom;  see man page. */
 
-fftw_home= get_env("HOME");
+fftw_home= get_env("HOME")+"/usr";
 //fftw_home= "/my/wisdom";
 
 FFTW_WISDOM_FNM = fftw_home+"/etc/fftw/wisdom_yorick";

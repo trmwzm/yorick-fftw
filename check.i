@@ -6,16 +6,16 @@ require, "offt.i";
 func _fftw_check (void)
 {
   if (is_void(n)) n= 1024;
-  
+
   write,""
   write,"Exec. this twice to see the effect of cached wisdom";
- 
+
   write,""
   write,"Caching or retrieving optimization info for pow(2) 1&2-D fft's....patience";
 
   elapsed= elapsed0= split1= split2= split3= split4= split5= [0., 0., 0.];
   //check init function
-  timer, elapsed;elapsed0= elapsed; 
+  timer, elapsed;elapsed0= elapsed;
     ck_init;
   timer, elapsed, split1;
   write,"Done caching wisdom";
@@ -75,12 +75,12 @@ func _fftw_check (void)
   timer, elapsed, split3;
   write,"Fftw done:";
 
-  //fft 
+  //fft
   ws= fft_setup(d);
   for (i=0 ; i<32 ; i++) fs= fft(c, ld, setup=ws);  /* exec */
   timer, elapsed, split4;
   write,"Swarztrauber done:";
- 
+
   //testm.i fft tests
   write,""
   write, "testing fftw routines as in testm.i...";
@@ -109,9 +109,9 @@ func ck1(d,ld)
 {
   write,""
   write,"fft(x,ld) with dimsof(x)="+pr1(d)+" and ld="+pr1(ld);
-  
+
   c= cplxgr(d);
-    
+
   fs= fft(c, ld);
   fw= fftw(c, ld);
   write,(fs.re-fw.re)(*)(ptp),(fs.im-fw.im)(*)(ptp),\
@@ -186,7 +186,7 @@ func cplxgr (d) {
 func cplx2f (z) {
   d= dimsof(z);
   f= array(0.f,_(d(1)+1,2,d(2:)));
-  f(1,..)= z.re; f(2,..)= z.im; 
+  f(1,..)= z.re; f(2,..)= z.im;
   return f;
 }
 
@@ -196,15 +196,15 @@ func _offt_check (d,usefftw=)
   for (n=1,i=1;i<=d(1);i++)
     n*= d(i+1);
 
-  oo= offt(usefftw=usefftw);   
-  ooi= offt(usefftw=usefftw); 
-  
-  c= cplxgr(d); 
+  oo= offt(usefftw=usefftw);
+  ooi= offt(usefftw=usefftw);
+
+  c= cplxgr(d);
   cf= oo(c,1);
   cf= ooi(cf,-1)/n;
   oo, reset=1;
   ooi, reset=1;
- 
+
   sf= (usefftw==1?" FFTW":string(0));
 
   write,"\n double out-of-place"+sf;
@@ -213,7 +213,7 @@ func _offt_check (d,usefftw=)
   oo= offt(usefftw=usefftw);
   ooi= offt(usefftw=usefftw);
 
-  c= cplxgr(d); 
+  c= cplxgr(d);
   cf= c;
   oo, cf, 1;
   ooi, cf, -1;
@@ -227,10 +227,10 @@ func _offt_check (d,usefftw=)
   if (usefftw==1) {
     d2= _(d(1)+1,2,d(2:));
 
-    oow= offt(usefftw=1); 
+    oow= offt(usefftw=1);
     ooiw= offt(usefftw=1);
 
-    c= cplx2f(cplxgr(d)); 
+    c= cplx2f(cplxgr(d));
     cfw= oow(c,1,fcplx=1);
     cfw= ooiw(cfw,-1,fcplx=1)/n;
     oow, reset=1;
@@ -238,9 +238,9 @@ func _offt_check (d,usefftw=)
     write,"\n float out-of-place"+sf;
     write,"fftw Mean, STD: ",(dd=abs(c-cfw)(*))(avg),dd(rms);
 
-    oow= offt(usefftw=1,fcplx=1); 
+    oow= offt(usefftw=1,fcplx=1);
     ooiw= offt(usefftw=1,fcplx=1);
-    c= cplx2f(cplxgr(d)); 
+    c= cplx2f(cplxgr(d));
     cfw= c;
     oow, cfw, 1;
     ooiw, cfw, -1;
@@ -252,9 +252,64 @@ func _offt_check (d,usefftw=)
   }
 }
 
+func _fftwrap_check (d,usefftw=)
+{
+  if (is_void(d)) d= [2,128,256];
+  for (n=1,i=1;i<=d(1);i++)
+    n*= d(i+1);
+
+  oo= fftwrap(d,1,usefftw=usefftw);
+  oo, add, d, -1, usefftw=usefftw;
+
+  c= cplxgr(d);
+  cf= oo(eval,c,1,usefftw=usefftw,reset=usefftw);
+  cf= oo(eval,cf,-1,usefftw=usefftw,reset=1)/n;
+
+  sf= (usefftw==1?" FFTW":string(0));
+
+  write,"\n double out-of-place"+sf;
+  write,"fft  Mean, STD: ",(dd=abs(c-cf)(*))(avg),dd(rms);
+
+  oo= fftwrap(d,1,usefftw=usefftw,inplace=1);
+  oo, add, d, -1, usefftw=usefftw,inplace=1;
+
+  c= cplxgr(d);
+  cf= c;
+  oo,eval, cf, 1, usefftw=usefftw,reset=usefftw;
+  oo,eval, cf,-1, usefftw=usefftw,reset=1;
+  cf*= 1.0/n;
+
+  write,"\n double in-place"+sf;
+  write,"fft  Mean, STD: ",(dd=abs(c-cf)(*))(avg),dd(rms);
+
+  if (usefftw==1) {
+    d2= _(d(1)+1,2,d(2:));
+
+    oow= fftwrap(d2,1,usefftw=1,fcplx=1);
+    oow,add,d2,-1,usefftw=1,fcplx=1;
+
+    c= cplx2f(cplxgr(d));
+    cfw= oow(eval,c,1,fcplx=1,usefftw=usefftw,reset=1);
+    cfw= oow(eval,cfw,-1,fcplx=1,usefftw=usefftw,reset=1)/n;
+    write,"\n float out-of-place"+sf;
+    write,"fftw Mean, STD: ",(dd=abs(c-cfw)(*))(avg),dd(rms);
+
+    oow= fftwrap(d2,1,usefftw=1,fcplx=1,inplace=1);
+    oow, add,d2,-1,usefftw=1,fcplx=1,inplace=1;
+    c= cplx2f(cplxgr(d));
+    cfw= c;
+    oow,eval, cfw, 1,fcplx=1,usefftw=usefftw,reset=1;
+    oow,eval, cfw,-1,fcplx=1,usefftw=usefftw,reset=1;
+    cfw*= 1.0/n;
+    write,"\n float in-place"+sf;
+    write,"fftw Mean, STD: ",(dd=abs(c-cfw)(*))(avg),dd(rms);
+  }
+}
+
 if (batch()) {
   _fftw_check;
   _offt_check;
   _offt_check,usefftw=1;
+  _fftwrap_check;
+  _fftwrap_check,usefftw=1;
 }
-
