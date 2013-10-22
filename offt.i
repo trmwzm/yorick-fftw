@@ -153,9 +153,9 @@ func fftwrap (base, dims, ljdir, rjdir, usefftw=, inplace=, fcplx=)
    create an fft operator with or without a first initialization.
    oft, add, dims,ljdir,rjdir,usefftw=,inplace=,fcplx=;
    oft, reset, dims,ljdir,rjdir,usefftw=,inplace=,fcplx=,index=;
-   oft, eval,x,ljdir,rjdir,reset=,fcplx=;
+   oft, eval,x,ljdir,rjdir,reset=,fcplx=,usefftw=;
    or
-   y= oft(eval,x,ljdir,rjdir,reset=,fcplx=);
+   y= oft(eval,x,ljdir,rjdir,reset=,fcplx=,usefftw=);
 
 
  * SEE ALSO: fftw, fft.
@@ -246,9 +246,18 @@ func _get (dims,ljdir,rjdir,&i,fcplx=,inplace=,usefftw=,verbose=)
 
   return cfg;
 }
-func reset (dims,ljdir,rjdir,fcplx=,inplace=,usefftw=,index=)
+func reset (dims,ljdir,rjdir,fcplx=,inplace=,usefftw=,index=,all=)
 {
-    use, cfgdb;
+  use, cfgdb;
+  if (all==1) {
+      for (i=1;i<=cfgdb(*);i++) {
+          cfg= cfgdb(noop(i));
+          if (cfg(usefftw)==1)
+              fftw_clean, cfg(setup), fcplx=cfg(fcplx);
+      }
+      cfgdb= save();
+      return;
+  }
   if (is_void(index))
       cfg= use_method(_get,dims,ljdir,rjdir,index,fcplx=fcplx, \
                       inplace=inplace,usefftw=usefftw);
