@@ -232,7 +232,7 @@ func _get (dims,ljdir,rjdir,&i,fcplx=,inplace=,usefftw=,verbose=)
       o= cfgdb(noop(i));
       if ( usefftw==1 && o(usefftw)==1 && fcplx==o(fcplx) && \
            inplace==o(inplace) && dims(1)==o(dims,1) && \
-           allof(dirs==o(dirs)) )
+           allof(dirs==o(dirs)) && allof(dims==o(dims)))
           return o;
       owd= where(o(dirs));
       if ( usefftw==0 && o(usefftw)==0 && numberof(owd)>=numberof(wd) && \
