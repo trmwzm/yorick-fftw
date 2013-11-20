@@ -20,29 +20,31 @@ long _fftwT (double tlim) /* set time limit on planning */
 long _fftwI (char *wisdom_file) /* import */
 {
   FILE *fp;
+  int stat;
   fp = fopen(wisdom_file, "r");
   if((fp = fopen(wisdom_file, "r"))==NULL) {
     printf("Error reading wisdom file\"%s\"\n",wisdom_file);
     fflush(stdout);
     exit(0);
   }
-  fftw_import_wisdom_from_file(fp);
+  stat= fftw_import_wisdom_from_file(fp);
   fclose(fp);
-  return (1);
+  return stat;
 }
 /*--------------------------------------------------------------------------*/
 long _fftwO (char *wisdom_file) /* export */
 {
   FILE *fp;
+  int stat;
   if((fp = fopen(wisdom_file, "w"))==NULL) {
     printf("Error creating wisdom file\"%s\"\n",wisdom_file);
     fflush(stdout);
     exit(0);
   }
-  fftw_export_wisdom_to_file(fp);
+  stat = fftw_export_wisdom_to_file(fp);
   fflush(fp);
   fclose(fp);
-  return (1);
+  return stat;
 }
 /*--------------------------------------------------------------------------*/
 long _fftwA (char* w, long ni) /* export wisdom to string */
@@ -130,29 +132,31 @@ void _fftwC (void)  /*cleanup*/
 long _fftwfI (char *wisdom_file) /* import */
 {
   FILE *fp;
+  int stat;
   fp = fopen(wisdom_file, "r");
   if((fp = fopen(wisdom_file, "r"))==NULL) {
     printf("Error reading wisdom file\"%s\"\n",wisdom_file);
     fflush(stdout);
     exit(0);
   }
-  fftwf_import_wisdom_from_file(fp);
+  stat = fftwf_import_wisdom_from_file(fp);
   fclose(fp);
-  return (1);
+  return stat;
 }
 /*--------------------------------------------------------------------------*/
 long _fftwfO (char *wisdom_file) /* export */
 {
   FILE *fp;
+  int stat;
   if((fp = fopen(wisdom_file, "w"))==NULL) {
     printf("Error creating wisdom file\"%s\"\n",wisdom_file);
     fflush(stdout);
     exit(0);
   }
-  fftwf_export_wisdom_to_file(fp);
+  stat = fftwf_export_wisdom_to_file(fp);
   fflush(fp);
   fclose(fp);
-  return (1);
+  return stat;
 }
 /*--------------------------------------------------------------------------*/
 long _fftwfA (char* w, long ni) /* export wisdom to string */
