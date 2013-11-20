@@ -35,16 +35,15 @@ long _fftwI (char *wisdom_file) /* import */
 long _fftwO (char *wisdom_file) /* export */
 {
   FILE *fp;
-  int stat;
   if((fp = fopen(wisdom_file, "w"))==NULL) {
     printf("Error creating wisdom file\"%s\"\n",wisdom_file);
     fflush(stdout);
     exit(0);
   }
-  stat = fftw_export_wisdom_to_file(fp);
+  fftw_export_wisdom_to_file(fp);
   fflush(fp);
   fclose(fp);
-  return stat;
+  return (1);
 }
 /*--------------------------------------------------------------------------*/
 long _fftwA (char* w, long ni) /* export wisdom to string */
@@ -147,16 +146,15 @@ long _fftwfI (char *wisdom_file) /* import */
 long _fftwfO (char *wisdom_file) /* export */
 {
   FILE *fp;
-  int stat;
   if((fp = fopen(wisdom_file, "w"))==NULL) {
     printf("Error creating wisdom file\"%s\"\n",wisdom_file);
     fflush(stdout);
     exit(0);
   }
-  stat = fftwf_export_wisdom_to_file(fp);
+  fftwf_export_wisdom_to_file(fp);
   fflush(fp);
   fclose(fp);
-  return stat;
+  return (1);
 }
 /*--------------------------------------------------------------------------*/
 long _fftwfA (char* w, long ni) /* export wisdom to string */
