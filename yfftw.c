@@ -58,8 +58,8 @@ long _fftwA (char* w, long ni) /* export wisdom to string */
 /*--------------------------------------------------------------------------*/
 fftw_plan _fftwP (fftw_complex *in,   /* plan */
 	          fftw_complex *out,
-	          long ft_rank, long *ft_dims, long *ft_strides, 
-	          long ft_loop, long *loop_dims, long *loop_strides, 
+	          long ft_rank, long *ft_dims, long *ft_strides,
+	          long ft_loop, long *loop_dims, long *loop_strides,
 	          long dir)                         /* forward (1) or reverse (-1) */
 {
   /* Declarations */
@@ -85,23 +85,21 @@ fftw_plan _fftwP (fftw_complex *in,   /* plan */
     id_loop[i].is = loop_strides[i];
     id_loop[i].os = loop_strides[i];
   }
-    
+
   if (in == out){ /*in place*/
     p = fftw_plan_guru_dft((int)ft_rank, id_fft, (int)ft_loop, id_loop, in, in, sign, plan_mode);
   }else{
     p = fftw_plan_guru_dft((int)ft_rank, id_fft, (int)ft_loop, id_loop, in, out, sign, plan_mode);
   }
-  
+
   fftw_free(id_fft);
   fftw_free(id_loop);
 
   return p;
 }
 /*--------------------------------------------------------------------------*/
-void _fftwE (int pi, fftw_complex *in, fftw_complex *out)  /*execute*/
+void _fftwE (fftw_plan p, fftw_complex *in, fftw_complex *out)  /*execute*/
 {
-  fftw_plan p;
-  p= (fftw_plan)pi;
   fftw_execute_dft(p, in, out);
   return;
 }
@@ -169,8 +167,8 @@ long _fftwfA (char* w, long ni) /* export wisdom to string */
 /*--------------------------------------------------------------------------*/
 fftwf_plan _fftwfP (fftwf_complex *in,   /* plan */
 	          fftwf_complex *out,
-	          long ft_rank, long *ft_dims, long *ft_strides, 
-	          long ft_loop, long *loop_dims, long *loop_strides, 
+	          long ft_rank, long *ft_dims, long *ft_strides,
+	          long ft_loop, long *loop_dims, long *loop_strides,
 	          long dir)                         /* forward (1) or reverse (-1) */
 {
   /* Declarations */
@@ -196,13 +194,13 @@ fftwf_plan _fftwfP (fftwf_complex *in,   /* plan */
     id_loop[i].is = loop_strides[i];
     id_loop[i].os = loop_strides[i];
   }
-    
+
   if (in == out){ /*in place*/
     p = fftwf_plan_guru_dft((int)ft_rank, id_fft, (int)ft_loop, id_loop, in, in, sign, plan_mode);
   }else{
     p = fftwf_plan_guru_dft((int)ft_rank, id_fft, (int)ft_loop, id_loop, in, out, sign, plan_mode);
   }
-  
+
   fftwf_free(id_fft);
   fftwf_free(id_loop);
 
