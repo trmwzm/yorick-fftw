@@ -75,8 +75,7 @@ func fftw_init_wisdom (nlimit)
     for (n=2;n<=nlimit(m);n++) {
       d= _(m,array(2^n,m));
       p= fftw(d,1);
-      p= [0n,0n];
-      fftw,d,1,,p;
+      p= [0,0];fftw,d,1,,p;
     }
   }
   return _fftwO(FFTW_WISDOM_FNM);
@@ -101,7 +100,7 @@ func fftwf_init_wisdom (nlimit)
     for (n=2;n<=nlimit(m);n++) {
       d= _(m+1,2,array(2^n,m));
       p= fftw(d,1);
-      p= [0n,0n];
+      p= [0,0];
       fftw,d,1,,p;
     }
   }
@@ -155,7 +154,7 @@ func fftw (x, ljdir, rjdir, &plan, nosave=, fcplx=, keep=)
    If FCPLX==1 input arrays X==array(float,2,..) are treated
    as float-complex.
 
-   PLAN == array(int, 2)
+   PLAN == array(long, 2)
            where plan(1) is 0 if there is no dir=+1 transforms
                       or is a casted pointer to an fftw plan
            where plan(2) is 0 if there is no dir=-1 transforms
@@ -247,9 +246,9 @@ func fftw (x, ljdir, rjdir, &plan, nosave=, fcplx=, keep=)
  */
 {
   if (is_void(plan)) {
-    plan= array(int,2);
+    plan= array(long,2);
     iplan= 1;
-  } else if (numberof(plan)==2 && allof(plan==[0n,0n])) {
+  } else if (numberof(plan)==2 && allof(plan==[0,0])) {
     iplan= 1;
   } else {
     iplan= 0;
@@ -257,7 +256,7 @@ func fftw (x, ljdir, rjdir, &plan, nosave=, fcplx=, keep=)
 
   if (structof(x)==long) {  /* planning X dimsof(x) if d1==2 assume fftwf */
     iplan= 1;
-    plan= array(int,2);
+    plan= array(long,2);
     planex= 0;
     if (x(1)==0) return;
     if (x(1)>7) error,"numberof dimensions > 7 ?";
@@ -353,10 +352,10 @@ func fftw (x, ljdir, rjdir, &plan, nosave=, fcplx=, keep=)
       if (planex==1) {
         if (dcplx==1) {
           _fftwE, plan(ip), x, xx;
-          if (iplan==1 && keep!=1) {_fftwD, plan(ip);plan(ip)= 0n;};
+          if (iplan==1 && keep!=1) {_fftwD, plan(ip);plan(ip)= 0;};
         } else {
           _fftwfE, plan(ip), x, xx;
-          if (iplan==1 && keep!=1) {_fftwfD, plan(ip);plan(ip)= 0n;}
+          if (iplan==1 && keep!=1) {_fftwfD, plan(ip);plan(ip)= 0;}
         }
         if (idir==1) x= xx;
       }
@@ -380,10 +379,10 @@ func fftw_clean (&p, fcplx=)
 {
   if (fcplx!=1)
     for (i=1;i<=numberof(p);i++)
-      if (p(i)) {_fftwD, p(i);p(i)= 0n;}
+      if (p(i)) {_fftwD, p(i);p(i)= 0;}
   else
     for (i=1;i<=numberof(p);i++)
-      if (p(i)) {_fftwfD, p(i);p(i)= 0n;}
+      if (p(i)) {_fftwfD, p(i);p(i)= 0;}
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -421,11 +420,11 @@ extern  _fftwA
  */
 extern  _fftwP
 /* PROTOTYPE
-   int _fftwP (complex array in, complex array out, long ft_rank, long array ft_dims,
+   long _fftwP (complex array in, complex array out, long ft_rank, long array ft_dims,
                 long array ft_strides, long ft_loop, long array loop_dims,
             long array loop_strides, long dir)
 */
-/* DOCUMENT int _fftwP (complex array in, complex array out, long ft_rank, long array ft_dims,
+/* DOCUMENT long _fftwP (complex array in, complex array out, long ft_rank, long array ft_dims,
                          long array ft_strides, long ft_loop, long array loop_dims,
                      long array loop_strides, long dir)
    [P]lan multidimensional ffts for double-complex
@@ -443,24 +442,24 @@ extern  _fftwP
  */
 extern  _fftwE
 /* PROTOTYPE
-   void _fftwE (int plan, complex array in, complex array out)
+   void _fftwE (long plan, complex array in, complex array out)
 */
-/* DOCUMENT _fftwE (int plan, complex array in, complex array out)
+/* DOCUMENT _fftwE (long plan, complex array in, complex array out)
    [E]xecute plan ! data & fft geometry must be identical to plan
  */
 extern  _fftwD
 /* PROTOTYPE
-   void _fftwD (int plan)
+   void _fftwD (long plan)
 */
-/* DOCUMENT  void _fftwD (int plan)
+/* DOCUMENT  void _fftwD (long plan)
    usage: _fftwD,p; p= [];
    [D]estroy plan
 */
 extern  _fftwS
 /* PROTOTYPE
-   void _fftwS (int plan)
+   void _fftwS (long plan)
 */
-/* DOCUMENT  void _fftwS (int plan)
+/* DOCUMENT  void _fftwS (long plan)
    print plan to [S]creen (needs a newline)
 */
 extern  _fftwC
@@ -519,24 +518,24 @@ extern _fftwfP
  */
 extern _fftwfE
 /* PROTOTYPE
-   void _fftwfE (int plan, float array in, float array out)
+   void _fftwfE (long plan, float array in, float array out)
 */
-/* DOCUMENT  void _fftwfE (int plan, float array in, float array out)
+/* DOCUMENT  void _fftwfE (long plan, float array in, float array out)
    [E]xecute plan ! data & fft geometry must be identical to plan
 */
 extern _fftwfD
 /* PROTOTYPE
-   void _fftwfD (int plan)
+   void _fftwfD (long plan)
 */
-/* DOCUMENT  void _fftwfD (int plan)
+/* DOCUMENT  void _fftwfD (long plan)
    usage: _fftwfD,p; p= [];
    [D]estroy plan
 */
 extern _fftwfS
 /* PROTOTYPE
-   void _fftwfS (int plan)
+   void _fftwfS (long plan)
 */
-/* DOCUMENT  void _fftwfS (int plan)
+/* DOCUMENT  void _fftwfS (long plan)
    print plan to [S]creen (needs a newline)
 */
 extern _fftwfC
