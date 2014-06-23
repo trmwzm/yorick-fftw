@@ -10,10 +10,11 @@ FFTW_TIMELIMIT = 3*60.0;   /* double seconds */
 /* System-wide files might be in /etc and could be copied from there. */
 /* Fftw3 distribution comes with exec. fftw[f]-wisdom;  see man page. */
 
-fftw_home= get_env("HOME")+"/usr";
-//fftw_home= "/my/wisdom";
+fftw_home= get_env("FFTW_WISDOM");
+if (fftw_home==string(0))
+  error,"FFTW_WISDOM not defined";
 
-FFTW_WISDOM_FNM = fftw_home+"/etc/fftw/wisdom_yorick";
+FFTW_WISDOM_FNM  = fftw_home+"/etc/fftw/wisdom_yorick";
 FFTWF_WISDOM_FNM = fftw_home+"/etc/fftw/wisdom_f_yorick";
 
 func fftw_wisdom (void)
