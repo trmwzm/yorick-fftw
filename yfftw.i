@@ -14,13 +14,16 @@ fftw_home= get_env("FFTW_WISDOM");
 if (fftw_wisdom==string(0))
   error,"FFTW_WISDOM env var not defined";
 
+if (open(fftw_home+"/fftw","r",1))
+  fftw_home+= "/fftw";
+
 FFTW_WISDOM_FNM = fftw_home+"/wisdom_yorick";
 FFTWF_WISDOM_FNM = fftw_home+"/wisdom_f_yorick";
 
 if (open(FFTW_WISDOM_FNM,"r",1)==[] ||
     open(FFTWF_WISDOM_FNM,"r",1)==[])
   error,"wisdom files not found in: "+fftw_home;
-    
+
 func fftw_wisdom (void)
 /* DOCUMENT func fftw_wisdom(void)
    The function runs each time this file is included.
